@@ -1,0 +1,95 @@
+﻿@model Dropdown.Models.FeedBack
+
+@{
+    ViewBag.Title = "Submit";
+}
+
+<h2>Submit</h2>
+
+
+@using (Html.BeginForm("Submit","FeedBack",FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>FeedBack</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.FullName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.FullName, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.FullName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.MobileNo, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.MobileNo, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.MobileNo, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CountryID,"Select Country", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.CountryID, @ViewBag.CountryID as SelectList, "Select Country", new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.CountryID, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.StateID,"Select State",htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.StateID, @ViewBag.StateID as SelectList, "Select State", new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.StateID, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Add" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script language="javascript">
+        $(document).ready(function () {
+            $("#CountryID").change(function () {
+                // this will call when Country Dropdown select change
+                var countryID = parseInt($("#CountryID").val());
+                if (!isNaN(countryID)) {
+                    var ddState = $("#StateID");
+                    ddState.empty(); // this line is for clear all items from State dropdown
+                    ddState.append($("<option></option").val("").html("Select State"));
+
+                    // Here I will call Controller Action via Jquery to load State for selected Country
+                    $.ajax({
+                        url: "@Url.Action("GetStates","Feedback")",
+                        type: "GET",
+                        data: { countryID: countryID },
+                        dataType: "json",
+                        success: function (data) {
+                            $.each(data, function (i, val) {
+                                ddState.append(
+                                        $("<option></option>").val(val.StateID).html(val.StateName)
+                                    );
+                            });
+                        },
+                        error: function () {
+                            alert("Error!");
+                        }
+                    });
+                }
+            });
+        });
+</script>
+}
